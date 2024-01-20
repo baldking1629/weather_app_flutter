@@ -1,7 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:weather_app_flutter/constants/app_constants.dart';
 import 'package:weather_app_flutter/models/weather_model.dart';
 import 'package:weather_app_flutter/services/weather_service.dart';
+import 'package:weather_app_flutter/theme/theme_provider.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -18,7 +23,7 @@ class _WeatherPageState extends State<WeatherPage> {
     String cityName = await _weatherService.getCurrentCity();
 
     try {
-      final weather = await _weatherService.getWeather('Amsterdam');
+      final weather = await _weatherService.getWeather(cityName);
       setState(() {
         _weather = weather;
       });
@@ -61,16 +66,47 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+        title: Text(
+          "Hava Durumu",
+          style: appConstants().textThemeStyle(context),
+        ),
+      ),
+      drawer: Drawer(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        child: Center(
+          child: CupertinoSwitch(
+            value: Provider.of<ThemeProvider>(context).isDarkMode,
+            onChanged: (value) =>
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme(),
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               _weather?.cityName ?? "loading city...",
+              style: appConstants().textThemeStyle(context),
             ),
-            Lottie.asset(getWeatherAnimation(_weather?.mainCondition)),
-            Text('${_weather?.temperature.round()}°C'),
-            Text(_weather?.mainCondition ?? ""),
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Lottie.asset(getWeatherAnimation(_weather?.mainCondition)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Text(
+                '${_weather?.temperature.round()}°C',
+                style: appConstants().textThemeStyle(context),
+              ),
+            ),
+            Text(
+              _weather?.mainCondition ?? "",
+              style: appConstants().textThemeStyle(context),
+            ),
           ],
         ),
       ),
